@@ -14,7 +14,7 @@ import {
 } from "./gridConfig";
 
 import { DateHeader } from "./headerComponents";
-import { TotalMedalsToolTip } from "./toolTips";
+
 const GridExample = () => {
   const gridStyle = useMemo(() => ({ height: "100%", width: "100%" }), []);
   const [rowData, setRowData] = useState();
@@ -75,6 +75,85 @@ const GridExample = () => {
     }
   }, [gridApi, groupByCountry, columnDefs]);
 
+  // apply custom styles to the exported excel file to freeze the header
+  const excelStyles = [
+    {
+      id: "header",
+      font: {
+        bold: true,
+      },
+      fill: {
+        type: "pattern",
+        patternType: "solid",
+        fgColor: "#D9D9D9",
+      },
+      border: {
+        top: {
+          style: "thin",
+          color: "#000000",
+        },
+        left: {
+          style: "thin",
+          color: "#000000",
+        },
+        bottom: {
+          style: "thin",
+          color: "#000000",
+        },
+        right: {
+          style: "thin",
+          color: "#000000",
+        },
+      },
+    },
+  ];
+
+  const exportAsXL = (params) => {
+    gridApi.exportDataAsExcel({
+      fileName: "myFile.xlsx",
+      sheetName: "Sheet1",
+      headerRowHeight: 25, // set the height of the header row to freeze it
+    });
+  };
+
+  const getRows = () => [
+    { cells: [] },
+    {
+      cells: [
+        {
+          data: {
+            value: 'Here is a comma, and a some "quotes".',
+            type: 'String',
+          },
+        },
+      ],
+    },
+    {
+      cells: [
+        {
+          data: {
+            value:
+              'They are visible when the downloaded file is opened in Excel because custom content is properly escaped.',
+            type: 'String',
+          },
+        },
+      ],
+    },
+    {
+      cells: [
+        { data: { value: 'this cell:', type: 'String' }, mergeAcross: 1 },
+        {
+          data: {
+            value: 'is empty because the first cell has mergeAcross=1',
+            type: 'String',
+          },
+        },
+      ],
+    },
+    { cells: [] },
+  ];
+  
+
   return (
     <div style={containerStyle}>
       <button
@@ -88,6 +167,12 @@ const GridExample = () => {
         onClick={() => setGroupByCountry((prev) => !prev)}
       >
         Group
+      </button>
+      <button
+        style={{ margin: "1rem 1rem 1rem 0", padding: "0.5rem", font: "Arial" }}
+        onClick={exportAsXL}
+      >
+        Download
       </button>
       <div style={gridStyle} className="ag-theme-alpine">
         {groupByCountry ? (
